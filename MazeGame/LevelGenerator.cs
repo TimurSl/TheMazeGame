@@ -5,6 +5,7 @@ namespace SimpleMazeGame;
 public class LevelGenerator
 {
     private Vector2 finishPos;
+    private Vector2 playerStart;
     public bool[,] GetLevel(int width, int height, int seed)
     {
         bool[,] maze = new bool[width, height];
@@ -46,22 +47,37 @@ public class LevelGenerator
             maze[x, y] = false;
         }
         
-        // add finish point to the maze
+        // add finish point to the random place
         int finishX = rand.Next(1, width - 2);
         int finishY = rand.Next(1, height - 2);
         maze[finishX, finishY] = false;
         finishPos = new Vector2(finishX, finishY);
         
+        // add player start point to the random place
+        int playerStartX = rand.Next(1, width - 2);
+        int playerStartY = rand.Next(1, height - 2);
+        maze[playerStartX, playerStartY] = false;
+        playerStart = new Vector2(playerStartX, playerStartY);
+
         return maze;
     }
 
     public Vector2 GetFinishPos()
     {
-        if (finishPos.X == 0 && finishPos.Y == 0)
+        if (finishPos is {X: 0, Y: 0})
         {
             finishPos = new Vector2(1, 1);
         }
         return finishPos;
+    }
+    
+    public Vector2 GetPlayerStart()
+    {
+        if (playerStart is {X: 0, Y: 0})
+        {
+            playerStart = new Vector2(1, 1);
+        }
+        return playerStart;
     }
     
     private static void RecursiveBacktracking(bool[,] maze, int x, int y, Random rand)
@@ -70,10 +86,11 @@ public class LevelGenerator
 
         List<int[]> directions = new List<int[]>
         {
-            new int[] { -1, 0 }, // left
-            new int[] { 1, 0 }, // right
-            new int[] { 0, -1 }, // up
-            new int[] { 0, 1 } // down
+            // ReSharper disable HeapView.ObjectAllocation.Evident
+            new[] { -1, 0 }, // left
+            new[] { 1, 0 }, // right
+            new[] { 0, -1 }, // up
+            new[] { 0, 1 } // down
         };
 
         // shuffle the directions randomly
@@ -92,8 +109,8 @@ public class LevelGenerator
             int newX = x + dx * 2;
             int newY = y + dy * 2;
 
-            if (newX >= 1 && newX < maze.GetLength(0) - 1 &&
-                newY >= 1 && newY < maze.GetLength(1) - 1 &&
+            if (newX >= 0 && newX < maze.GetLength(0) - 1 &&
+                newY >= 0 && newY < maze.GetLength(1) - 1 &&
                 !maze[newX, newY])
             {
                 maze[x + dx, y + dy] = true;
@@ -101,5 +118,6 @@ public class LevelGenerator
             }
         }
     }
+    
 }
 

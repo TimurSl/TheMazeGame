@@ -9,7 +9,13 @@
 
         static void Main(string[] args)
         {
-            Game game = new Game(width, height, seed, new StandartInput(), new LevelGenerator(), new StandartLevelSystem());
+            Game game = new Game(new StandartInput())
+            {
+                width = width,
+                height = height,
+                levelGenerator = new LevelGenerator(),
+                levelSystem = new StandartLevelSystem(),
+            };
             game.Run();
         }
     }
