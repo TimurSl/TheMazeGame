@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System.Diagnostics;
+using System.Numerics;
 using Figgle;
 
 namespace SimpleMazeGame;
@@ -21,14 +22,15 @@ public class Game
     public int width = 20;
     public int height = 20;
     public int seed = 0;
+    public bool randomSeed = false;
     
     private static bool[,] maze;
     private static Vector2 finishPos;
     
-    private Vector2 playerStart = new Vector2(1, 1);
+    public Vector2 playerStart = new Vector2(1, 1);
     private Vector2 playerPosition = new Vector2(1, 1);
-    private InputProvider inputProvider;
-    public LevelGenerator levelGenerator;
+    private InputProvider inputProvider = new StandartInput();
+    public LevelGenerator levelGenerator = new LevelGenerator();
     public LevelSystem levelSystem;
     
     private bool gameOver = false;
@@ -38,38 +40,10 @@ public class Game
         this.inputProvider = inputProvider;
     }
     
-    public Game(int width, int height, int seed, InputProvider inputProvider, LevelGenerator levelGenerator)
-    {
-        this.width = width;
-        this.height = height;
-        this.seed = seed;
-        this.inputProvider = inputProvider;
-        this.levelGenerator = levelGenerator;
-    }
-    
-    public Game(int width, int height, int seed, InputProvider inputProvider, LevelGenerator levelGenerator, LevelSystem levelSystem)
-    {
-        this.width = width;
-        this.height = height;
-        this.seed = seed;
-        this.inputProvider = inputProvider;
-        this.levelGenerator = levelGenerator;
-        this.levelSystem = levelSystem;
-    }
-    
-    public Game(int width, int height, int seed, InputProvider inputProvider, LevelGenerator levelGenerator, Vector2 playerStart)
-    {
-        this.width = width;
-        this.height = height;
-        this.seed = seed;
-        this.inputProvider = inputProvider;
-        this.levelGenerator = levelGenerator;
-        this.playerStart = playerStart;
-    }
-    
     public void Run()
     {
-        Console.CursorVisible = false;
+        Stopwatch sw = new Stopwatch();
+        sw.Start();
         Console.WriteLine(FiggleFonts.Standard.Render("Maze Game"));
         Console.WriteLine("Press any key to start");
         Console.ReadKey();
@@ -96,35 +70,39 @@ public class Game
             }
         }
         
-        Finish();
-    }
-
-    private void Finish()
-    {
         if (Environment.OSVersion.Platform == PlatformID.Win32NT)
             Console.SetWindowSize(80, 25);
         Console.Clear();
         Console.ForegroundColor = ConsoleColor.Red;
         Console.WriteLine(FiggleFonts.Standard.Render("You Win!"));
+        Console.WriteLine("Time: " + sw.Elapsed);
         Console.WriteLine("Congratulations! You won!");
         Console.WriteLine("Press any key to exit");
-        levelSystem.LevelUp();
+        
+        if(levelSystem != null)
+            levelSystem.LevelUp();
+        
         Console.ReadKey();
+        // stop the program
+        Environment.Exit(0);
     }
 
     private void StartLevel()
     {
-        seed = DateTime.Now.Millisecond + DateTime.Now.Second + DateTime.Now.Minute + DateTime.Now.Hour;
-        width = 10;
-        height = 10;
-        
-        int currentLevel = levelSystem.GetLevel();
-        width = currentLevel <= 10 ? 10 : width + currentLevel;
-        height = currentLevel <= 10 ? 10 : height + currentLevel;
-        
-        maze = levelGenerator.GetLevel(width, height, seed);
+        if (randomSeed)
+            seed = DateTime.Now.Millisecond * DateTime.Now.Second * DateTime.Now.Minute / DateTime.Now.Hour;
+        if (levelSystem != null)
+        {
+            int currentLevel = levelSystem.GetLevel();
+            maze = levelGenerator.GetLevel(currentLevel <= 10 ? 10 : width + currentLevel,
+                currentLevel <= 10 ? 10 : height + currentLevel, seed + currentLevel);
+        }
+        else
+        {
+            maze = levelGenerator.GetLevel(width, height, seed);
+        }
         finishPos = levelGenerator.GetFinishPos();
-        playerPosition = levelGenerator.GetPlayerStart();
+        playerPosition = playerStart;
         gameOver = false;
     }
 
@@ -132,23 +110,30 @@ public class Game
     {
         Vector2 input = inputProvider.GetInput();
         
-        if (IsPath(playerPosition + input) && input != Vector2.Zero)
+        if (input != Vector2.Zero)
         {
-            playerPosition += input;
+            bool canPass = IsPath(playerPosition + input);
+            if (canPass)
+            {
+                playerPosition += input;
+            }
         }
     }
     
     private bool IsPath(Vector2 pos)
     {
-        return !maze[(int) pos.Y, (int) pos.X];
+        // check if the pos not the wall
+        bool isWall = maze[(int) pos.Y, (int) pos.X];
+        return !isWall;
     }
     
-    private void DrawMaze(bool[,] walls, Vector2 playerPos, Vector2 exitPos)
+    private  void DrawMaze(bool[,] walls, Vector2 playerPos, Vector2 exitPos)
     {
         // if platform is windows 
         if (Environment.OSVersion.Platform == PlatformID.Win32NT)
         {
             // set the console window size to the maze size
+#pragma warning disable CA1416 // im tired of this warnings
             Console.SetWindowSize(width * 2, height + 1);
             // Console.SetBufferSize(width * 3, height * 3);
         }
@@ -164,6 +149,7 @@ public class Game
                 // if the current cell is the exit cell
                 else if (x == exitPos.X && y == exitPos.Y)
                 {
+                    walls[y, x] = false;
                     WriteToConsoleWithColor(ExitColor, Exit.ToString());
                 }
                 else if (walls[y, x])
