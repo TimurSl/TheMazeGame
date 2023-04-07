@@ -1,0 +1,43 @@
+Index: MazeGame/MazeGame.csproj
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><Project Sdk=\"Microsoft.NET.Sdk\">\r\n\r\n    <PropertyGroup>\r\n        <OutputType>Exe</OutputType>\r\n        <TargetFramework>net7.0</TargetFramework>\r\n        <ImplicitUsings>enable</ImplicitUsings>\r\n        <Nullable>enable</Nullable>\r\n    </PropertyGroup>\r\n\r\n    <ItemGroup>\r\n      <PackageReference Include=\"Figgle\" Version=\"0.5.1\" />\r\n    </ItemGroup>\r\n\r\n</Project>\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/MazeGame/MazeGame.csproj b/MazeGame/MazeGame.csproj
+--- a/MazeGame/MazeGame.csproj	(revision 5c92250162a43a9dccf49b27c5693f586853843f)
++++ b/MazeGame/MazeGame.csproj	(date 1680898484743)
+@@ -11,4 +11,8 @@
+       <PackageReference Include="Figgle" Version="0.5.1" />
+     </ItemGroup>
+ 
++    <ItemGroup>
++      <Content Include="MazeCore.csproj" />
++    </ItemGroup>
++
+ </Project>
+Index: MazeGame/MazeCore.csproj
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/MazeGame/MazeCore.csproj b/MazeGame/MazeCore.csproj
+new file mode 100644
+--- /dev/null	(date 1680898484033)
++++ b/MazeGame/MazeCore.csproj	(date 1680898484033)
+@@ -0,0 +1,14 @@
++<Project Sdk="Microsoft.NET.Sdk">
++
++    <PropertyGroup>
++        <OutputType>Exe</OutputType>
++        <TargetFramework>net7.0</TargetFramework>
++        <ImplicitUsings>enable</ImplicitUsings>
++        <Nullable>enable</Nullable>
++    </PropertyGroup>
++
++    <ItemGroup>
++      <PackageReference Include="Figgle" Version="0.5.1" />
++    </ItemGroup>
++
++</Project>
