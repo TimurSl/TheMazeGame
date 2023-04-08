@@ -44,10 +44,8 @@ public class Game
     {
         Stopwatch sw = new Stopwatch();
         sw.Start();
-        Console.WriteLine(FiggleFonts.Standard.Render("Maze Game"));
-        Console.WriteLine("Press any key to start");
-        Console.ReadKey();
-        
+        WelcomeMessage();
+
         StartLevel();
         
         inputProvider.onResetPressed += (() =>
@@ -64,12 +62,18 @@ public class Game
             UpdateInput();
             
             // check if player is on exit
-            if (playerPosition == finishPos)
-            {
-                gameOver = true;
-            }
+            gameOver = playerPosition == finishPos;
         }
         
+        FinishMessage(sw);
+
+        Console.ReadKey();
+        // stop the program
+        Environment.Exit(0);
+    }
+
+    private void FinishMessage(Stopwatch sw)
+    {
         if (Environment.OSVersion.Platform == PlatformID.Win32NT)
             Console.SetWindowSize(80, 25);
         Console.Clear();
@@ -78,13 +82,16 @@ public class Game
         Console.WriteLine("Time: " + sw.Elapsed);
         Console.WriteLine("Congratulations! You won!");
         Console.WriteLine("Press any key to exit");
-        
-        if(levelSystem != null)
+
+        if (levelSystem != null)
             levelSystem.LevelUp();
-        
+    }
+
+    private static void WelcomeMessage()
+    {
+        Console.WriteLine(FiggleFonts.Standard.Render("Maze Game"));
+        Console.WriteLine("Press any key to start");
         Console.ReadKey();
-        // stop the program
-        Environment.Exit(0);
     }
 
     private void StartLevel()

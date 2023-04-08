@@ -9,35 +9,14 @@ public class LevelGenerator
     {
         bool[,] maze = new bool[width, height];
 
-        // Initialize all cells as walls
-        for (int x = 0; x < width; x++)
-        {
-            for (int y = 0; y < height; y++)
-            {
-                maze[x, y] = false;
-            }
-        }
+        InitializeMaze(width, height, maze);
 
-        // make walls around the maze
-        for (int x = 0; x < width; x++)
-        {
-            maze[x, 0] = true;
-            maze[x, height - 1] = true;
-        }
-        for (int y = 0; y < height; y++)
-        {
-            maze[0, y] = true;
-            maze[width - 1, y] = true;
-        }
+        CreateWalls(width, height, maze);
 
         // initialize the random number generator with the given seed value
         Random rand = new Random(seed);
         
-        // add finish point to the maze
-        int finishX = rand.Next(1, width - 1);
-        int finishY = rand.Next(1, height - 1);
-        maze[finishX, finishY] = false;
-        finishPos = new Vector2(finishX, finishY);
+        PlaceFinish(width, height, rand, maze);
 
         // level generation using recursive backtracking
         int startX = rand.Next(0, width - 2);
@@ -54,6 +33,43 @@ public class LevelGenerator
 
         
         return maze;
+    }
+
+    private void PlaceFinish(int width, int height, Random rand, bool[,] maze)
+    {
+        // add finish point to the maze
+        int finishX = rand.Next(1, width - 1);
+        int finishY = rand.Next(1, height - 1);
+        maze[finishX, finishY] = false;
+        finishPos = new Vector2(finishX, finishY);
+    }
+
+    private static void CreateWalls(int width, int height, bool[,] maze)
+    {
+        // make walls around the maze
+        for (int x = 0; x < width; x++)
+        {
+            maze[x, 0] = true;
+            maze[x, height - 1] = true;
+        }
+
+        for (int y = 0; y < height; y++)
+        {
+            maze[0, y] = true;
+            maze[width - 1, y] = true;
+        }
+    }
+
+    private static void InitializeMaze(int width, int height, bool[,] maze)
+    {
+        // Initialize all cells as walls
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                maze[x, y] = false;
+            }
+        }
     }
 
     public Vector2 GetFinishPos()
